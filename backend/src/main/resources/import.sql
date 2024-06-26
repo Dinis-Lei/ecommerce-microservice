@@ -6,6 +6,9 @@ INSERT INTO item(id, name, price, stock) VALUES (5, 'Blueberry', 0.5, 200);
 INSERT INTO item(id, name, price, stock) VALUES (6, 'Nuts', 1.25, 100);
 INSERT INTO item(id, name, price, stock) VALUES (7, 'Peach', 4, 30);
 
+ALTER SEQUENCE item_seq RESTART WITH 8;
+
+
 INSERT INTO cart(id) VALUES (1);
 INSERT INTO cart(id) VALUES (2);
 INSERT INTO cart(id) VALUES (3);

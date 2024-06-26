@@ -12,7 +12,7 @@ public class CartItem extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "item_id")
     private Item item;
 
@@ -29,7 +29,7 @@ public class CartItem extends PanacheEntityBase {
     }
 
     public Long getItemId() {
-        return item.id;
+        return item.getId();
     }
 
     public void setItem(Item item) {
@@ -73,7 +73,7 @@ public class CartItem extends PanacheEntityBase {
         if (item == null || other.item == null) {
             return false;
         } 
-        else if (!item.id.equals(other.item.id))
+        else if (!item.getId().equals(other.item.getId()))
             return false;
         if (cart == null || other.cart == null) {
             return false;

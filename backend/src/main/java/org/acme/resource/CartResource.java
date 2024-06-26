@@ -94,7 +94,7 @@ public class CartResource {
                             .replaceWith(RestResponse.status(Response.Status.CREATED, "Checkout Successful"));
                 });
             })
-            .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND)));
+            .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND, "Cart not found")));
     }
 
     public static Uni<Boolean> hasQuantityExceededStock(Cart cart) {
@@ -170,27 +170,26 @@ public class CartResource {
         .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND)));
     }
 
-    // @DELETE
-    // @Path("/{id}/remove/{itemId}")
-    // public Uni<RestResponse<Cart>> removeItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId) {
-    //     return Panache.withTransaction(() -> 
-    //         Cart.findById(id)
-    //         .onItem().ifNotNull().transformToUni(cart -> {
-    //             Cart cartEntity = (Cart) cart;
-    //             return CartItem.delete("cart.id = ?1 and item.id = ?2", cartEntity.id, itemId)
-    //                             .chain(() -> {
-    //                                 cartEntity.getCartItems().removeIf(cartItem -> cartItem.getItemId().equals(itemId));
-    //                                 return cartEntity.persist();
-    //                             })
-    //                            .replaceWith(RestResponse.status(CREATED, cartEntity));
-                
-    //         })
-    //         .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND)));
-    // }
+    @DELETE
+    @Path("/{id}/remove/{itemId}")
+    public Uni<RestResponse<String>> removeItem(@PathParam("id") Long id, @PathParam("itemId") Long itemId) {
+        return Panache.withTransaction(() -> 
+            Cart.findById(id)
+            .onItem().ifNotNull().transformToUni(cart -> {
+                Cart cartEntity = (Cart) cart;
+                return Panache.withTransaction(() -> {
+                    return CartItem.delete("cart = ?1 and item.id = ?2", cartEntity, itemId)
+                    .chain(() -> {
+                        cartEntity.getCartItems().removeIf(cartItem -> cartItem.getItemId().equals(itemId));
+                        return cartEntity.persist();
+                    });
+                }).replaceWith(RestResponse.status(CREATED, "Item removed from cart"));
+            }).onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND, "Cart not found")));
+    }
 
     @DELETE
     @Path("/{id}/clearcart")
-    public Uni<RestResponse<Cart>> clearCart(@PathParam("id") Long id) {
+    public Uni<RestResponse<String>> clearCart(@PathParam("id") Long id) {
         return Panache.withTransaction(() -> Cart.findById(id)
         .onItem().ifNotNull().transformToUni(cart -> {
             Cart cartEntity = (Cart) cart;
@@ -202,9 +201,9 @@ public class CartResource {
                     cartEntity.getCartItems().clear();
                     return cartEntity.persist();
                 });
-            }).replaceWith(RestResponse.status(CREATED, cartEntity));
+            }).replaceWith(RestResponse.status(CREATED, "Cart cleared"));
         })
-        .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND)));
+        .onItem().ifNull().continueWith(RestResponse.status(NOT_FOUND, "Cart not found")));
     }
 
 }

@@ -1,11 +1,14 @@
 package org.acme.entity;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import jakarta.persistence.*;
 
 @Entity
-public class Item extends PanacheEntity {
+public class Item extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(length = 40, unique = true)
     public String name;
@@ -54,6 +57,12 @@ public class Item extends PanacheEntity {
         this.stock = stock;
     }
 
-    
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 }
